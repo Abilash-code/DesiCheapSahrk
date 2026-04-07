@@ -7,6 +7,9 @@ import playwright
 import sys
 import json
 
+# this project is only meant for educational purposes , to buy any game please use the official websites , DesiCheapShark does not endore 
+# any digital marketplace 
+
 sys.stdout.reconfigure(encoding='utf-8')
 
 unavailable_on_steam = False
