@@ -7,8 +7,8 @@ import playwright
 import sys
 import json
 
-# this project is only meant for educational purposes , to buy any game please use the official websites , DesiCheapShark does not endore 
-# any digital marketplace 
+# this project is only meant for educational purposes , to buy any game please use the official websites , DesiCheapShark does not endorse 
+# any digital marketplace over another.
 
 sys.stdout.reconfigure(encoding='utf-8')
 
