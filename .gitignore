@@ -1,0 +1,32 @@
+# Virtual environment
+.venv/
+venv/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE settings
+.vscode/
+.idea/
+
+# Local data/state files
+steam_state.json
+*.json
+
+# Other scripts to ignore (everything except what we want)
+crack.py
+cURL.py
+epic*.py
+finalv1.py
+finalv2.py
+finalv3.py
+finalv4.py
+GPT_*.py
+playwrighter.py
+test.py
+.python-version
+pyproject.toml
+uv.lock
