@@ -1,0 +1,197 @@
+import requests
+from bs4 import BeautifulSoup
+from playwright.sync_api import sync_playwright
+from playwright_stealth import Stealth
+import playwright
+import sys
+from types import NoneType
+
+sys.stdout.reconfigure(encoding='utf-8')
+
+unavailable_on_steam = False
+unavailable_on_epic = False
+free_on_steam = False
+free_on_epic = False
+
+client_id = "5gtq0ml1qcjpy56bh7engi1qiwkmiy"
+access_token = "vz61epwja2wwizko955xb8z3epj63u"
+
+url = "https://api.igdb.com/v4/games"
+
+headers = {
+    "Client-ID": client_id,
+    "Authorization": f"Bearer {access_token}"
+}
+
+list_of_game_names  = []
+
+def GameName(url,headers) :
+    game_name = input("Enter game name : ")
+    query = f"""
+    search "{game_name}";
+    fields name;
+    """
+    try :
+        response_1 = requests.post(url, headers=headers, data=query)
+    except requests.exceptions.ConnectionError as e :
+        sys.exit()
+        print("Internet issues")
+    output = response_1.json()
+    i = 1
+    for game in output :
+        list_of_game_names.append(game["name"])
+        print(f"{i}. {game["name"]}")
+        i+=1
+    if not list_of_game_names :
+        print("the game you searched for does not exist in IGDB")
+        sys.exit()
+    return output
+
+output = GameName(url,headers)
+
+def GameSelect(output) :
+    game_id = int(input(" From the list of games displayed on the terminal \n select the serial No of the game you want the details of : "))-1
+    if game_id < 0 or game_id > (len(list_of_game_names)-1) :
+        print("please only enter numbers within the list of games")
+        sys.exit() 
+    final_game_id = output[game_id]["id"]
+    final_query = f"""
+        fields name,websites.category,websites.url;
+        where id = {final_game_id};
+        """
+    try :
+        response_2 = requests.post(url,headers=headers,data=final_query)
+    except requests.exceptions.ConnectionError as e :
+        print("Internet issues")
+        sys.exit()
+    final_IDGB_output = response_2.json()
+    websites = final_IDGB_output[0]["websites"]
+    return websites
+
+websites = GameSelect(output)
+
+def SteamURL(websites,unavailable_on_steam) :
+    steam_url = ""
+    for site in websites :
+        url = site["url"]
+        if "store.steampowered.com/app/" in url :
+            steam_url = url
+    return steam_url,unavailable_on_steam
+
+def EpicURL(websites,unavailable_on_epic) :
+    epic_url = ""
+    for site in websites :
+        url = site["url"]
+        if "https://www.epicgames.com/store/p/" in url or "https://store.epicgames.com/en-US/p/" in url or "https://store.epicgames.com/p/" in url or "https://www.epicgames.com/store/en-US/product/" in url:
+            epic_url = url
+    return epic_url,unavailable_on_epic
+
+steam_url,unavailable_on_steam = SteamURL(websites,unavailable_on_steam)    
+
+    
+def SteamPrice(steam_url,free_on_steam,unavailable_on_steam) :
+    try : 
+        steam_response = requests.get(steam_url)
+        steam_content = steam_response.text
+        steam_soup = BeautifulSoup(steam_content,"html.parser")
+        steam_discount_div = steam_soup.find("div",class_="discount_final_price")
+        all_classes = steam_discount_div.get('class')
+        print(all_classes)
+        if steam_discount_div is not None :
+            print(f"hey {steam_discount_div}")
+            steam_price = steam_discount_div.text.strip()
+            if steam_price == "Free To Play" :
+                free_on_steam = True
+                return 0,free_on_steam,unavailable_on_steam
+            else :
+                steam_price_number = int("".join(char for char in steam_price if char.isdigit()))
+                print(steam_price_number)
+                return steam_price_number,free_on_steam,unavailable_on_steam
+        else : 
+            steam_div = steam_soup.find("div",class_ = "game_purchase_price price")
+            if isinstance(steam_div,NoneType) :
+                unavailable_on_steam = True 
+                return 0,free_on_steam,unavailable_on_steam
+            else :
+                steam_price = steam_div.text.strip()
+                if steam_price == "Free To Play" :
+                    free_on_steam = True
+                    return 0,free_on_steam,unavailable_on_steam
+                else :
+                    steam_price_number = int("".join(char for char in steam_price if char.isdigit()))
+                    print(steam_price_number)
+                    return steam_price_number,free_on_steam,unavailable_on_steam
+    except requests.exceptions.MissingSchema as e :
+        print("The game is not availabe on steam")
+        unavailable_on_steam = True
+        sys.exit()
+    except requests.exceptions.ConnectionError as e :
+        print("Internet issues")
+        sys.exit()
+
+epic_url,unavailable_on_epic = EpicURL(websites,unavailable_on_epic)
+
+
+def EpicPrice(epic_url,free_on_epic,unavailable_on_epic):
+    epic_price_number = 0
+    try :
+        with sync_playwright() as p :
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(
+                user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+            )
+            stealth = Stealth()
+            stealth.apply_stealth_sync(context)
+            page = context.new_page()
+            page.goto(epic_url)
+            strong = page.locator("strong").all()
+            epic_price = ""
+            i = 0
+            if not free_on_epic :
+                for _ in strong :
+                    e_price = strong[i].text_content().strip()
+                    if "Free" in e_price :
+                        free_on_epic = True
+                        return epic_price_number,free_on_epic,unavailable_on_epic
+                    if "₹" in e_price : 
+                        epic_price = e_price
+                    i+=1
+                    try:
+                        if not epic_price :
+                            continue
+                        epic_price_number = int("".join(char for char in epic_price if char.isdigit()))
+                        print(epic_price_number)
+                        return epic_price_number,free_on_epic,unavailable_on_epic
+                    except ValueError :
+                        unavailable_on_epic = True
+                    return epic_price_number,free_on_epic,unavailable_on_epic
+                browser.close()
+    except playwright._impl._errors.TimeoutError as e :
+        print("browser timeout , you might wanna check your internet connection")
+    except playwright._impl._errors.Error as e :
+        print("the game is not available on epic ")
+        sys.exit()
+
+steam_price_number,free_on_steam,unavailable_on_steam = SteamPrice(steam_url,free_on_steam,unavailable_on_steam)
+
+epic_price_number,free_on_epic,unavailable_on_epic = EpicPrice(epic_url,free_on_epic,unavailable_on_epic)
+if unavailable_on_steam and unavailable_on_epic :
+    print("The game you requested is unavailable in both market places")
+elif unavailable_on_steam :
+    print("the game you requested is unavailable on steam")
+elif unavailable_on_epic :
+    print("The game you requested is unavaialble on epic")
+else : 
+    if free_on_steam and free_on_epic :
+        print("The game is free on both marketplaces")
+    elif free_on_steam :
+        print("The game is free on steam so buy there")
+    elif free_on_epic :
+        print("the game is free on epic so buy there")
+    else :
+        if steam_price_number > epic_price_number :
+            print("buy on epic")
+        elif steam_price_number == epic_price_number :
+            print("buy on either")
+        else :
+            print("buy on steam")

@@ -7,9 +7,6 @@ import playwright
 import sys
 import json
 
-# this project is only meant for educational purposes , to buy any game please use the official websites , DesiCheapShark does not endorse 
-# any digital marketplace over another.
-
 sys.stdout.reconfigure(encoding='utf-8')
 
 unavailable_on_steam = False
@@ -18,7 +15,7 @@ free_on_steam = False
 free_on_epic = False
 
 client_id = "5gtq0ml1qcjpy56bh7engi1qiwkmiy"
-access_token = "2qqczfmuk3kdcteer96hp8toxpasq1"
+access_token = "vz61epwja2wwizko955xb8z3epj63u"
 
 state_data = {
     'cookies': [
@@ -80,13 +77,9 @@ def GameSelect(output) :
     except requests.exceptions.ConnectionError as e :
         print("Internet issues")
         sys.exit()
-    try :
-        final_IDGB_output = response_2.json()
-        websites = final_IDGB_output[0]["websites"]
-        return websites
-    except Exception as e :
-        print("The game exists on the database but does not have any marketplace listings")
-        sys.exit()
+    final_IDGB_output = response_2.json()
+    websites = final_IDGB_output[0]["websites"]
+    return websites
 
 websites = GameSelect(output)
 
@@ -102,7 +95,7 @@ def EpicURL(websites,unavailable_on_epic) :
     epic_url = ""
     for site in websites :
         url = site["url"]
-        if "https://www.epicgames.com/store/p/" in url or "https://store.epicgames.com/en-US/p/" in url or "https://store.epicgames.com/p/" in url or "https://www.epicgames.com/store/en-US/product/" in url or "https://epicgames.com/p/" in url:
+        if "https://www.epicgames.com/store/p/" in url or "https://store.epicgames.com/en-US/p/" in url or "https://store.epicgames.com/p/" in url or "https://www.epicgames.com/store/en-US/product/" in url:
             epic_url = url
     return epic_url,unavailable_on_epic
 
@@ -110,49 +103,62 @@ steam_url,unavailable_on_steam = SteamURL(websites,unavailable_on_steam)
 
     
 def SteamPrice(steam_url,free_on_steam,unavailable_on_steam) :
-    steam_price = 0
+    steam_price_number = 0
     try :
         with sync_playwright() as p :
-            browser = p.chromium.launch(headless=True)
+            browser = p.chromium.launch(headless=False)
             context = browser.new_context(
                 user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
                 storage_state="steam_state.json"
             )
-            context.set_default_timeout(50000)
+            context.set_default_timeout(100000)
             stealth = Stealth()
             stealth.apply_stealth_sync(context)
             page = context.new_page()
             page.goto(steam_url,wait_until="domcontentloaded")
-            try :
-                Price = page.locator("div.game_area_purchase_game_wrapper,div.game_area_purchase_game").first
-                Price.wait_for(state="visible",timeout=6000)
-            except  playwright._impl._errors.TimeoutError as e :
-                print(e) 
-                print("the game is not available on steam")  
-                unavailable_on_steam = True
-                return 0,free_on_steam,unavailable_on_steam     
-            Price_string = Price.text_content().strip()
-            if "Free To Play" in Price_string :
-                steam_price_number = 0
-                free_on_steam = True
-                return steam_price_number,free_on_steam,unavailable_on_steam
-            for i  in range(len(Price_string)) :
-                letter = Price_string[i]
-                if letter == "₹" :
-                    steam_price = ""
-                    for j in range(i,len(Price_string)) :
-                        ezhuthu = Price_string[j]
-                        if ezhuthu.isdigit() :
-                            steam_price = steam_price + ezhuthu
-            steam_price_number = int(steam_price)
-            print(steam_price_number)
-            return steam_price_number,free_on_steam,unavailable_on_steam
+            steam_price = ""
+            try : 
+                Price = page.locator("div.game_purchase_price")
+                Price.wait_for(state="visible", timeout=50000)
+                steam_price = Price.text_content().strip()
+                if steam_price == "Free To Play" :
+                    free_on_steam = True
+                    return 0,free_on_steam,unavailable_on_steam
+                else :
+                    steam_price_number = int("".join(char for char in steam_price if char.isdigit()))
+                    print(steam_price_number)
+                    try : 
+                        Discount = page.locator("div.discount_final_price").first
+                        Discount.wait_for(state="visible", timeout=25000) 
+                        steam_price = Discount.text_content().strip()
+                        if steam_price == "Free To Play" :
+                            free_on_steam = True
+                            return 0,free_on_steam,unavailable_on_steam
+                        else :
+                            steam_price_number = int("".join(char for char in steam_price if char.isdigit()))
+                            print(steam_price_number)
+                            return steam_price_number,free_on_steam,unavailable_on_steam
+                    except playwright._impl._errors.TimeoutError as e :
+                        return steam_price_number,free_on_steam,unavailable_on_steam
+            except playwright._impl._errors.TimeoutError as e :
+                try : 
+                    Discount = page.locator("div.discount_final_price")
+                    Discount.wait_for(state="visible", timeout=25000) 
+                    steam_price = Discount.text_content().strip()
+                    if steam_price == "Free To Play" :
+                        free_on_steam = True
+                        return 0,free_on_steam,unavailable_on_steam
+                    else :
+                        steam_price_number = int("".join(char for char in steam_price if char.isdigit()))
+                        print(steam_price_number)
+                        return steam_price_number,free_on_steam,unavailable_on_steam    
+                except playwright._impl._errors.TimeoutError as e :
+                    unavailable_on_steam = True 
+                    return 0,free_on_steam,unavailable_on_steam
         browser.close()
     except playwright._impl._errors.TimeoutError as e :
         print(e)
         print("browser timeout , you might wanna check your internet connection")
-        unavailable_on_steam = True
-        return 0,free_on_steam,unavailable_on_steam
     except playwright._impl._errors.Error as e :
         print(e)
         print("the game is not available on steam ")
@@ -160,8 +166,8 @@ def SteamPrice(steam_url,free_on_steam,unavailable_on_steam) :
 
 epic_url,unavailable_on_epic = EpicURL(websites,unavailable_on_epic)
 
+
 def EpicPrice(epic_url,free_on_epic,unavailable_on_epic):
-    print(epic_url)
     epic_price_number = 0
     try :
         with sync_playwright() as p :
@@ -174,46 +180,39 @@ def EpicPrice(epic_url,free_on_epic,unavailable_on_epic):
             page = context.new_page()
             page.goto(epic_url)
             strong = page.locator("strong").all()
-            print(epic_url)
-            print(len(strong))
             epic_price = ""
             i = 0
-            for _ in strong :
-                e_price = strong[i].text_content().strip()
-                if "Free" in e_price :
-                    free_on_epic = True
+            if not free_on_epic :
+                for _ in strong :
+                    e_price = strong[i].text_content().strip()
+                    if "Free" in e_price :
+                        free_on_epic = True
+                        return epic_price_number,free_on_epic,unavailable_on_epic
+                    if "₹" in e_price : 
+                        epic_price = e_price
+                    i+=1
+                    try:
+                        if not epic_price :
+                            continue
+                        epic_price_number = int("".join(char for char in epic_price if char.isdigit()))
+                        if "." in epic_price :
+                            epic_price_number_2 = str(epic_price_number)
+                            deciding_digit = int(epic_price_number_2[len(epic_price_number_2)-2])
+                            if deciding_digit >= 5 :
+                                epic_price_number = (epic_price_number//100)+1
+                            else :
+                                epic_price_number = (epic_price_number//100)
+                        print(epic_price_number)
+                        return epic_price_number,free_on_epic,unavailable_on_epic
+                    except ValueError :
+                        unavailable_on_epic = True
                     return epic_price_number,free_on_epic,unavailable_on_epic
-                if "₹" in e_price : 
-                    epic_price = e_price
-                i+=1
-                try:
-                    if not epic_price :
-                        epic_price_number = 0
-                        if i == len(strong) :
-                            return 0,free_on_epic,True
-                        continue
-                    epic_price_number = int("".join(char for char in epic_price if char.isdigit()))
-                    if "." in epic_price :
-                        epic_price_number_2 = str(epic_price_number)
-                        deciding_digit = int(epic_price_number_2[len(epic_price_number_2)-2])
-                        if deciding_digit >= 5 :
-                            epic_price_number = (epic_price_number//100)+1
-                        else :
-                            epic_price_number = (epic_price_number//100)
-                    print(epic_price_number)
-                    return epic_price_number,free_on_epic,unavailable_on_epic
-                except ValueError :
-                    unavailable_on_epic = True
-                return epic_price_number,free_on_epic,unavailable_on_epic
-            browser.close()
+                browser.close()
     except playwright._impl._errors.TimeoutError as e :
-        print("browser timeout , you might wanna check your internet connection,heyyyy")
-        return 0,False,True
+        print("browser timeout , you might wanna check your internet connection")
     except playwright._impl._errors.Error as e :
-        print(e)
         print("the game is not available on epic ")
-        return 0,False,True
-    
+        sys.exit()
 
 steam_price_number,free_on_steam,unavailable_on_steam = SteamPrice(steam_url,free_on_steam,unavailable_on_steam)
 
