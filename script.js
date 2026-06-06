@@ -4,7 +4,7 @@ document.getElementById("game_name_submit_button").onclick = function(){
     let user_request = document.getElementById("game_name_input").value ;
     let text = "";
     let i = 1;
-    fetch(`https://desicheapshark.onrender.com/search?user_request=${user_request}`)
+    fetch(`https://desicheapsahrk.onrender.com/search?user_request=${user_request}`)
     .then(response => response.json())
     .then(data => { data.forEach(element => {
         text += `${i}. ${element["name"]} \n`;
@@ -45,10 +45,10 @@ document.getElementById("game_name_submit_button").onclick = function(){
 
     number_submit.onclick = function(){
     let game_number = Number(document.getElementById("game_choice_input").value);
-    fetch(`https://desicheapshark.onrender.com/game?game_id=${game_number}`)
+    fetch(`https://desicheapsahrk.onrender.com/game?game_id=${game_number}`)
     .then(response => response.json())
     .then(data => {console.log(data)
-    fetch("https://desicheapshark.onrender.com/SteamURL")
+    fetch("https://desicheapsahrk.onrender.com/SteamURL")
     .then(response => response.json())
     .then(data => {console.log(data)
     let a1 = document.createElement("a");
@@ -61,7 +61,7 @@ document.getElementById("game_name_submit_button").onclick = function(){
     document.body.appendChild(br3);
     document.body.appendChild(br4);
     document.body.appendChild(a1);
-    fetch("https://desicheapshark.onrender.com/EpicURL")
+    fetch("https://desicheapsahrk.onrender.com/EpicURL")
     .then(response => response.json())
     .then(data => {console.log(data)
     let a2 = document.createElement("a");
@@ -74,7 +74,7 @@ document.getElementById("game_name_submit_button").onclick = function(){
     document.body.appendChild(br5);
     document.body.appendChild(br6);
     document.body.appendChild(a2);
-    fetch("https://desicheapshark.onrender.com/steam")
+    fetch("https://desicheapsahrk.onrender.com/steam")
     .then(response => response.json())
     .then(data => {console.log(data)
     let p1 = document.createElement("p");
@@ -82,13 +82,13 @@ document.getElementById("game_name_submit_button").onclick = function(){
     let br7 = document.createElement("br");
     document.body.appendChild(br7);
     document.body.appendChild(p1);
-    fetch("https://desicheapshark.onrender.com/epic")
+    fetch("https://desicheapsahrk.onrender.com/epic")
     .then(response => response.json())
     .then(data => {console.log(data)
     let p2 = document.createElement("p");
     p2.textContent = data[0];
     document.body.appendChild(p2);
-    fetch("https://desicheapshark.onrender.com/finalResult")
+    fetch("https://desicheapsahrk.onrender.com/finalResult")
     .then(response => response.json())
     .then(data => {
         console.log(data);
