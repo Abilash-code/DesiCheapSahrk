@@ -1,5 +1,5 @@
 # Start with Microsoft's official Playwright environment for Python
-FROM mcr.microsoft.com/playwright/python:v1.49.0-jammy
+FROM mcr.microsoft.com/playwright/python:v1.60.0-jammy
 
 # Create a folder inside the container for your project files
 WORKDIR /app
