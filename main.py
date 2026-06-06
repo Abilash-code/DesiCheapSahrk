@@ -142,7 +142,7 @@ def SteamPrice() :
             page.goto(steam_url,wait_until="domcontentloaded")
             try :
                 Price = page.locator("div.game_area_purchase_game_wrapper,div.game_area_purchase_game").first
-                Price.wait_for(state="visible",timeout=6000)
+                Price.wait_for(state="visible",timeout=20000)
             except  playwright._impl._errors.TimeoutError as e :
                 print(e) 
                 print("the game is not available on steam")  
@@ -193,6 +193,7 @@ def EpicPrice():
             stealth.apply_stealth_sync(context)
             page = context.new_page()
             page.goto(epic_url)
+            page.locator('strong:has-text("₹"), strong:has-text("Free")').wait_for(state="visible", timeout=150000)
             strong = page.locator("strong").all()
             epic_price = ""
             i = 0
