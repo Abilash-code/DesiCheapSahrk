@@ -8,6 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 import playwright
 import sys
 import json
+import os
+
+os.environ["DEBUG"] = "pw:api"
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -148,7 +151,7 @@ def SteamPrice() :
             page.goto(indian_steam_url,wait_until="domcontentloaded")
             try :
                 Price = page.locator("div.game_area_purchase_game_wrapper,div.game_area_purchase_game").first
-                Price.wait_for(state="visible",timeout=10000)
+                Price.wait_for(state="visible",timeout=15000)
             except  playwright._impl._errors.TimeoutError as e :
                 print(e) 
                 print("the game is not available on steam")  
