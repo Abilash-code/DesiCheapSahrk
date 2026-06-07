@@ -132,7 +132,7 @@ def SteamPrice() :
         with sync_playwright() as p :
             browser = p.chromium.launch(headless=True,
             proxy={
-                "server" : "http://64.137.96.74:6641",
+                "server" : "http://209.127.138.10:5784",
                 "username" : "pgliikxt",
                 "password" : "mnkraifsf582"
             })
@@ -147,7 +147,7 @@ def SteamPrice() :
             page.goto(steam_url,wait_until="domcontentloaded")
             try :
                 Price = page.locator("div.game_area_purchase_game_wrapper,div.game_area_purchase_game").first
-                Price.wait_for(state="visible",timeout=20000)
+                Price.wait_for(state="visible",timeout=10000)
             except  playwright._impl._errors.TimeoutError as e :
                 print(e) 
                 print("the game is not available on steam")  
@@ -192,7 +192,7 @@ def EpicPrice():
         with sync_playwright() as p :
             browser = p.chromium.launch(headless=True,
             proxy={
-                "server" : "http://64.137.96.74:6641",
+                "server" : "http://209.127.138.10:5784",
                 "username" : "pgliikxt",
                 "password" : "mnkraifsf582"
             },
@@ -205,7 +205,7 @@ def EpicPrice():
             stealth.apply_stealth_sync(context)
             page = context.new_page()
             page.goto(epic_url)
-            page.locator('strong:has-text("₹"), strong:has-text("Free")').wait_for(state="visible", timeout=15000)
+            page.locator('strong:has-text("₹"), strong:has-text("Free")').wait_for(state="visible", timeout=10000)
             strong = page.locator("strong").all()
             epic_price = ""
             i = 0
