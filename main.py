@@ -203,7 +203,7 @@ def EpicPrice():
             stealth.apply_stealth_sync(context)
             page = context.new_page()
             page.goto(epic_url)
-            page.locator('strong:has-text("₹"), strong:has-text("Free")').wait_for(state="visible", timeout=150000)
+            page.locator('strong:has-text("₹"), strong:has-text("Free")').wait_for(state="visible", timeout=15000)
             strong = page.locator("strong").all()
             epic_price = ""
             i = 0
