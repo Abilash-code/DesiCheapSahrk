@@ -132,7 +132,7 @@ def SteamPrice() :
         with sync_playwright() as p :
             browser = p.chromium.launch(headless=True,
             proxy={
-                "server" : "http://38.154.203.95:5863",
+                "server" : "http://64.137.96.74:6641",
                 "username" : "pgliikxt",
                 "password" : "mnkraifsf582"
             })
@@ -192,7 +192,7 @@ def EpicPrice():
         with sync_playwright() as p :
             browser = p.chromium.launch(headless=True,
             proxy={
-                "server" : "http://198.105.121.200:6462",
+                "server" : "http://64.137.96.74:6641",
                 "username" : "pgliikxt",
                 "password" : "mnkraifsf582"
             },
