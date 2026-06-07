@@ -213,23 +213,8 @@ def EpicPrice():
             else :
                 indian_epic_url = epic_url.replace("store.epicgames.com/","store.epicgames.com/en-IN/")
             page.goto(indian_epic_url)
-            page.wait_for_load_state("networkidle", timeout=20000)
             page.locator('strong:has-text("₹"), strong:has-text("Free")').wait_for(state="visible", timeout=10000)
-            print("--- PLAYWRIGHT DIAGNOSTIC AUDIT START ---")
-            print(f"Current page URL according to browser: {page.url}")
-
-            all_strongs = page.locator("strong").all()
-            print(f"Total 'strong' elements detected on page: {len(all_strongs)}")
-
-            for index, element in enumerate(all_strongs):
-                try:
-                    text = element.text_content().strip()
-                    if text:
-                        print(f"[Strong Tag #{index}]: Text content found -> '{text}'")
-                except Exception as inspect_error:
-                    print(f"[Strong Tag #{index}]: Error reading tag -> {inspect_error}")
-
-            print("--- PLAYWRIGHT DIAGNOSTIC AUDIT END ---")
+            page.wait_for_timeout(3000)
             strong = page.locator("strong").all()
             epic_price = ""
             i = 0
