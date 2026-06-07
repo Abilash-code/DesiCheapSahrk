@@ -130,7 +130,12 @@ def SteamPrice() :
     steam_price = 0
     try :
         with sync_playwright() as p :
-            browser = p.chromium.launch(headless=True)
+            browser = p.chromium.launch(headless=True,
+            proxy={
+                "server" : "38.154.203.95",
+                "username" : "pgliikxt",
+                "password" : "mnkraifsf582"
+            })
             context = browser.new_context(
                 user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
                 storage_state="steam_state.json"
@@ -185,7 +190,12 @@ def EpicPrice():
     epic_price_number = 0
     try :
         with sync_playwright() as p :
-            browser = p.chromium.launch(headless=True)
+            browser = p.chromium.launch(headless=True,
+            proxy={
+                "server" : "38.154.203.95",
+                "username" : "pgliikxt",
+                "password" : "mnkraifsf582"
+            })
             context = browser.new_context(
                 user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
             )
