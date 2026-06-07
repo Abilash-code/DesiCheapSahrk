@@ -203,15 +203,17 @@ def EpicPrice():
             args=["--no-sandbox","--disable-setuid-sandbox","--disable-blink-features=AutomationControlled"])
             context = browser.new_context(
                 user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
-                ignore_https_errors=True,
-                locale = "en-IN",
-                geolocation={"longitude":72.8777,"latitude":19.0760},
-                permissions=["geolocation"]
+                ignore_https_errors=True
             )
             stealth = Stealth()
             stealth.apply_stealth_sync(context)
             page = context.new_page()
-            page.goto(epic_url)
+            if "en-US" in epic_url :
+                indian_epic_url = epic_url.replace("en-US","en-IN")
+            else :
+                indian_epic_url = epic_url.replace("store.epicgames.com/","store.epicgames.com/en-IN/")
+            page.goto(indian_epic_url)
+            page.wait_for_load_state("networkidle", timeout=20000)
             page.locator('strong:has-text("₹"), strong:has-text("Free")').wait_for(state="visible", timeout=10000)
             print("--- PLAYWRIGHT DIAGNOSTIC AUDIT START ---")
             print(f"Current page URL according to browser: {page.url}")
@@ -262,6 +264,7 @@ def EpicPrice():
             browser.close()
     except playwright._impl._errors.TimeoutError as e :
         print("browser timeout , you might wanna check your internet connection,heyyyy")
+        unavailable_on_epic = True
         return 0,False,True
     except playwright._impl._errors.Error as e :
         print(e)
