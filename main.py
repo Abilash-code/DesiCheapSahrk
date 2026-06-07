@@ -192,12 +192,14 @@ def EpicPrice():
         with sync_playwright() as p :
             browser = p.chromium.launch(headless=True,
             proxy={
-                "server" : "http://38.154.203.95:5863",
+                "server" : "http://198.105.121.200:6462",
                 "username" : "pgliikxt",
                 "password" : "mnkraifsf582"
-            })
+            },
+            args=["--no-sandbox","--disable-setuid-sandbox","--disable-blink-features=AutomationControlled"])
             context = browser.new_context(
-                user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
+                user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
+                ignore_https_errors=True
             )
             stealth = Stealth()
             stealth.apply_stealth_sync(context)
