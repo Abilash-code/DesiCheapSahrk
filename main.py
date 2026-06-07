@@ -254,8 +254,21 @@ def EpicPrice():
     except playwright._impl._errors.Error as e :
         print(e)
         print("the game is not available on epic ")
+        # --- NEW DEBUG TRAP ---
+        debug_list = []
+        try:
+            # Grab every strong tag on the page exactly as it exists at the moment of failure
+            all_strongs = page.locator("strong").all()
+            for element in all_strongs:
+                text = element.text_content().strip()
+                if text:
+                    debug_list.append(text)
+        except Exception as debug_error:
+            debug_list.append(f"Failed to read DOM: {debug_error}")
+        # ----------------------
         unavailable_on_epic = True
-        return 0,False,True
+        browser.close()
+        return debug_list,False,True
     
 @app.get("/finalResult")
 def finalResult() : 
