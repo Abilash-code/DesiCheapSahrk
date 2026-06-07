@@ -192,7 +192,7 @@ def EpicPrice():
         with sync_playwright() as p :
             browser = p.chromium.launch(headless=True,
             proxy={
-                "server" : "38.154.203.95",
+                "server" : "http://38.154.203.95:5863",
                 "username" : "pgliikxt",
                 "password" : "mnkraifsf582"
             })
