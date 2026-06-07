@@ -144,7 +144,8 @@ def SteamPrice() :
             stealth = Stealth()
             stealth.apply_stealth_sync(context)
             page = context.new_page()
-            page.goto(steam_url,wait_until="domcontentloaded")
+            indian_steam_url = f"{steam_url}?cc=in&l=english"
+            page.goto(indian_steam_url,wait_until="domcontentloaded")
             try :
                 Price = page.locator("div.game_area_purchase_game_wrapper,div.game_area_purchase_game").first
                 Price.wait_for(state="visible",timeout=10000)
@@ -204,7 +205,11 @@ def EpicPrice():
             stealth = Stealth()
             stealth.apply_stealth_sync(context)
             page = context.new_page()
-            page.goto(epic_url)
+            if "en-US" in epic_url :
+                indian_epic_url = epic_url.replace("en-US","en-IN")
+            else :
+                indian_epic_url = epic_url.replace("store.epicgames.com/","store.epicgames.com/en-IN/")
+            page.goto(indian_epic_url)
             page.locator('strong:has-text("₹"), strong:has-text("Free")').wait_for(state="visible", timeout=10000)
             strong = page.locator("strong").all()
             epic_price = ""
