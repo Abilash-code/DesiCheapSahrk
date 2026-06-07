@@ -213,6 +213,21 @@ def EpicPrice():
             page = context.new_page()
             page.goto(epic_url)
             page.locator('strong:has-text("₹"), strong:has-text("Free")').wait_for(state="visible", timeout=10000)
+            print("--- PLAYWRIGHT DIAGNOSTIC AUDIT START ---")
+            print(f"Current page URL according to browser: {page.url}")
+
+            all_strongs = page.locator("strong").all()
+            print(f"Total 'strong' elements detected on page: {len(all_strongs)}")
+
+            for index, element in enumerate(all_strongs):
+                try:
+                    text = element.text_content().strip()
+                    if text:
+                        print(f"[Strong Tag #{index}]: Text content found -> '{text}'")
+                except Exception as inspect_error:
+                    print(f"[Strong Tag #{index}]: Error reading tag -> {inspect_error}")
+
+            print("--- PLAYWRIGHT DIAGNOSTIC AUDIT END ---")
             strong = page.locator("strong").all()
             epic_price = ""
             i = 0
